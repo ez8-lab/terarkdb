@@ -2555,6 +2555,43 @@ Status BlockBasedTable::Get(const ReadOptions& read_options, const Slice& key,
   return s;
 }
 
+Status BlockBasedTable::ForEachBlockKey(
+    void* arg, bool (*callback_func)(void* arg, const Slice& key)) {
+  char cache_key[kMaxCacheKeyPrefixSize + kMaxVarint64Length];
+
+  // Manual inline GetCacheKey
+  assert(rep_->cache_key_prefix != 0);
+  assert(rep_->cache_key_prefix_size <= kMaxCacheKeyPrefixSize);
+  memcpy(cache_key, rep_->cache_key_prefix, rep_->cache_key_prefix_size);
+
+  auto do_callback = [this, &cache_key, arg, callback_func](uint64_t offset) {
+    char* end = EncodeVarint64(cache_key + rep_->cache_key_prefix_size, offset);
+    callback_func(arg, Slice(cache_key, static_cast<size_t>(end - cache_key)));
+  };
+
+  // FilterBlock
+  if (rep_->table_options.block_cache.get() && rep_->filter_policy != nullptr &&
+      !rep_->table_options.cache_index_and_filter_blocks) {
+    do_callback(rep_->filter_handle.offset());
+  }
+
+  ReadOptions read_options;
+  std::unique_ptr<InternalIteratorBase<BlockHandle>> iiter(
+      NewIndexIterator(read_options));
+
+  // DataBlock
+  for (iiter->SeekToFirst(); iiter->Valid(); iiter->Next()) {
+    do_callback(iiter->value().offset());
+  }
+
+  iiter.reset();
+
+  // IndexBlock
+  do_callback(rep_->dummy_index_reader_offset);
+
+  return Status::OK();
+}
+
 Status BlockBasedTable::Prefetch(const Slice* const begin,
                                  const Slice* const end) {
   auto& comparator = rep_->internal_comparator;

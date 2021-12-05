@@ -81,14 +81,14 @@ enum CompressionType : unsigned char {
   kDisableCompressionOption = 0xff,
 };
 
-enum WriteBufferFlushPri : unsigned char { kFlushOldest, kFlushLargest };
-
-// Sst purpose
-enum SstPurpose {
-  kEssenceSst,  // Actual data storage sst
-  kLogSst,      // Log as sst
-  kMapSst,      // Dummy sst
+// TODO(zhaoming.274): what's force evict ?
+enum TableEvictType : unsigned char {
+  kSkipForceEvict = 0,
+  kForceEvictIfOpen = 1,
+  kAlwaysForceEvict = 2,
 };
+
+enum WriteBufferFlushPri : unsigned char { kFlushOldest, kFlushLargest };
 
 struct Options;
 struct DbPath;
