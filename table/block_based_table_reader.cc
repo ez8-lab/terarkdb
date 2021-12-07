@@ -2560,7 +2560,6 @@ Status BlockBasedTable::ForEachBlockKey(
   char cache_key[kMaxCacheKeyPrefixSize + kMaxVarint64Length];
 
   // Manual inline GetCacheKey
-  assert(rep_->cache_key_prefix != 0);
   assert(rep_->cache_key_prefix_size <= kMaxCacheKeyPrefixSize);
   memcpy(cache_key, rep_->cache_key_prefix, rep_->cache_key_prefix_size);
 

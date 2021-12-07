@@ -19,6 +19,8 @@
 #include "db/event_helpers.h"
 #include "db/memtable_list.h"
 #include "rocksdb/terark_namespace.h"
+#include "util/chash_map.h"
+#include "util/chash_set.h"
 #include "util/file_util.h"
 #include "util/sst_file_manager_impl.h"
 #include "utilities/util/valvec.hpp"
@@ -354,17 +356,22 @@ void DBImpl::PurgeObsoleteFiles(JobContext& state, bool schedule_only) {
 
   // Now, convert live list to an unordered map, WITHOUT mutex held;
   // set is slow.
-  std::unordered_set<uint64_t> sst_live;
+  chash_map<uint64_t, FileMetaData*> sst_live;
   for (auto v : state.version_ref) {
     auto vstorage = v->storage_info();
     for (int i = -1; i < vstorage->num_levels(); ++i) {
       for (auto f : vstorage->LevelFiles(i)) {
-        sst_live.emplace(f->fd.GetNumber());
+        sst_live.emplace(f->fd.GetNumber(), nullptr);
       }
     }
   }
-  std::unordered_set<uint64_t> log_recycle_files_set(
-      state.log_recycle_files.begin(), state.log_recycle_files.end());
+  auto is_sst_live = [&sst_live](uint64_t file_number) {
+    auto find = sst_live.find(file_number);
+    return find != sst_live.end() && find->second == nullptr;
+  };
+
+  chash_set<uint64_t> log_recycle_files_set(state.log_recycle_files.begin(),
+                                            state.log_recycle_files.end());
 
   auto& candidate_files = state.full_scan_candidate_files;
   candidate_files.reserve(
@@ -379,7 +386,10 @@ void DBImpl::PurgeObsoleteFiles(JobContext& state, bool schedule_only) {
     if (file.metadata->table_reader_handle) {
       table_cache_->Release(file.metadata->table_reader_handle);
     }
-    file.DeleteMetadata();
+    if (!sst_live.emplace(file.metadata->fd.GetNumber(), file.metadata)
+             .second) {
+      file.DeleteMetadata();
+    }
   }
 
   for (auto file_num : state.log_delete_files) {
@@ -470,8 +480,7 @@ void DBImpl::PurgeObsoleteFiles(JobContext& state, bool schedule_only) {
       case kTableFile:
         // If the second condition is not there, this makes
         // DontDeletePendingOutputs fail
-        keep = (sst_live.find(number) != sst_live.end()) ||
-               number >= state.min_pending_output;
+        keep = is_sst_live(number) || number >= state.min_pending_output;
         break;
       case kTempFile:
         // Any temp files that are currently being written to must
@@ -482,7 +491,7 @@ void DBImpl::PurgeObsoleteFiles(JobContext& state, bool schedule_only) {
         //
         // TODO(yhchiang): carefully modify the third condition to safely
         //                 remove the temp options files.
-        keep = (sst_live.find(number) != sst_live.end()) ||
+        keep = is_sst_live(number) ||
                (number == state.pending_manifest_file_number) ||
                (to_delete.find(kOptionsFileNamePrefix) != std::string::npos);
         break;
@@ -563,6 +572,10 @@ void DBImpl::PurgeObsoleteFiles(JobContext& state, bool schedule_only) {
     } else {
       DeleteObsoleteFileImpl(state.job_id, fname, dir_to_sync, type, number);
     }
+  }
+
+  for (auto& pair : sst_live) {
+    delete pair.second;
   }
 
   {
