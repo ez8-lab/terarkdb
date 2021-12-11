@@ -106,6 +106,7 @@ using TERARKDB_NAMESPACE::SliceTransform;
 using TERARKDB_NAMESPACE::Snapshot;
 using TERARKDB_NAMESPACE::SstFileWriter;
 using TERARKDB_NAMESPACE::Status;
+using TERARKDB_NAMESPACE::TerarkZipTableOptions;
 using TERARKDB_NAMESPACE::Transaction;
 using TERARKDB_NAMESPACE::TransactionDB;
 using TERARKDB_NAMESPACE::TransactionDBOptions;
@@ -4128,6 +4129,29 @@ uint64_t rocksdb_approximate_memory_usage_get_cache_total(
 // deletes container with memory usage estimates
 void rocksdb_approximate_memory_usage_destroy(rocksdb_memory_usage_t* usage) {
   delete usage;
+}
+
+struct rocksdb_terark_zip_table_options_t {
+  TerarkZipTableOptions rep;
+};
+
+rocksdb_terark_zip_table_options_t* rocksdb_terark_zip_options_create() {
+  return new rocksdb_terark_zip_table_options_t;
+}
+
+void rocksdb_terark_zip_options_destroy(
+    rocksdb_terark_zip_table_options_t* options) {
+  delete options;
+}
+
+void rocksdb_options_set_terark_zip_table_factory(
+    rocksdb_options_t* opt,
+    rocksdb_terark_zip_table_options_t* tzt_options,
+    rocksdb_block_based_table_options_t* bbt_options) {
+  if (tzt_options) {
+    opt->rep.table_factory.reset(
+        TERARKDB_NAMESPACE::NewTerarkZipTableFactory(tzt_options->rep, TERARKDB_NAMESPACE::NewBlockBasedTableFactory(bbt_options->rep)));
+  }
 }
 
 }  // end extern "C"
