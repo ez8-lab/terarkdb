@@ -129,6 +129,9 @@ typedef struct rocksdb_wal_readoptions_t rocksdb_wal_readoptions_t;
 typedef struct rocksdb_memory_consumers_t rocksdb_memory_consumers_t;
 typedef struct rocksdb_memory_usage_t rocksdb_memory_usage_t;
 
+typedef struct rocksdb_block_based_table_options_t
+    rocksdb_terark_zip_table_options_t;
+
 /* DB operations */
 
 extern ROCKSDB_LIBRARY_API rocksdb_t* rocksdb_open(
@@ -1719,6 +1722,26 @@ rocksdb_approximate_memory_usage_get_mem_table_readers_total(
 extern ROCKSDB_LIBRARY_API uint64_t
 rocksdb_approximate_memory_usage_get_cache_total(
     rocksdb_memory_usage_t* memory_usage);
+
+extern ROCKSDB_LIBRARY_API rocksdb_terark_zip_table_options_t* rocksdb_terark_zip_options_create();
+
+extern ROCKSDB_LIBRARY_API void rocksdb_terark_zip_options_destroy(
+    rocksdb_terark_zip_table_options_t* options);
+
+extern ROCKSDB_LIBRARY_API void rocksdb_terark_zip_options_set_local_temp_dir(
+    rocksdb_terark_zip_table_options_t* options, const char* dir);
+
+extern ROCKSDB_LIBRARY_API void rocksdb_terark_zip_options_set_index_nest_level(
+    rocksdb_terark_zip_table_options_t* options, int32_t index_nest_level);
+
+extern ROCKSDB_LIBRARY_API void rocksdb_terark_zip_options_set_sample_ratio(
+    rocksdb_terark_zip_table_options_t* options, double sample_ratio);
+
+extern ROCKSDB_LIBRARY_API void rocksdb_terark_zip_options_set_terark_zip_min_level(
+    rocksdb_terark_zip_table_options_t* options, int terark_zip_min_level);
+
+extern ROCKSDB_LIBRARY_API void rocksdb_options_set_terark_zip_table_factory(
+    rocksdb_options_t* opt, rocksdb_terark_zip_table_options_t* table_options);
 
 #ifdef __cplusplus
 } /* end extern "C" */

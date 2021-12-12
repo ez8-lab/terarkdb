@@ -4144,6 +4144,26 @@ void rocksdb_terark_zip_options_destroy(
   delete options;
 }
 
+void rocksdb_terark_zip_options_set_local_temp_dir(
+    rocksdb_terark_zip_table_options_t* options, const char* dir) {
+  options->rep.localTempDir = dir;
+}
+
+void rocksdb_terark_zip_options_set_index_nest_level(
+    rocksdb_terark_zip_table_options_t* options, int32_t index_nest_level) {
+  options->rep.indexNestLevel = index_nest_level;
+}
+
+void rocksdb_terark_zip_options_set_sample_ratio(
+    rocksdb_terark_zip_table_options_t* options, double sample_ratio) {
+  options->rep.sampleRatio = sample_ratio;
+}
+
+void rocksdb_terark_zip_options_set_terark_zip_min_level(
+    rocksdb_terark_zip_table_options_t* options, int terark_zip_min_level) {
+  options->rep.terarkZipMinLevel = terark_zip_min_level;
+}
+
 void rocksdb_options_set_terark_zip_table_factory(
     rocksdb_options_t* opt,
     rocksdb_terark_zip_table_options_t* tzt_options,
