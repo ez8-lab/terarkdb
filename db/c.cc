@@ -4166,11 +4166,11 @@ void rocksdb_terark_zip_options_set_terark_zip_min_level(
 
 void rocksdb_options_set_terark_zip_table_factory(
     rocksdb_options_t* opt,
-    rocksdb_terark_zip_table_options_t* tzt_options,
-    rocksdb_block_based_table_options_t* bbt_options) {
-  if (tzt_options) {
+    rocksdb_terark_zip_table_options_t* tzto,
+    rocksdb_block_based_table_options_t* bbto) {
+  if (tzto && bbto) {
     opt->rep.table_factory.reset(
-        TERARKDB_NAMESPACE::NewTerarkZipTableFactory(tzt_options->rep, TERARKDB_NAMESPACE::NewBlockBasedTableFactory(bbt_options->rep)));
+        TERARKDB_NAMESPACE::NewTerarkZipTableFactory(tzto->rep, TERARKDB_NAMESPACE::NewBlockBasedTableFactory(bbto->rep)));
   }
 }
 

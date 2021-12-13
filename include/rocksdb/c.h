@@ -1741,7 +1741,9 @@ extern ROCKSDB_LIBRARY_API void rocksdb_terark_zip_options_set_terark_zip_min_le
     rocksdb_terark_zip_table_options_t* options, int terark_zip_min_level);
 
 extern ROCKSDB_LIBRARY_API void rocksdb_options_set_terark_zip_table_factory(
-    rocksdb_options_t* opt, rocksdb_terark_zip_table_options_t* table_options);
+    rocksdb_options_t* opt,
+    rocksdb_terark_zip_table_options_t* tzto,
+    rocksdb_block_based_table_options_t* bbto);
 
 #ifdef __cplusplus
 } /* end extern "C" */
