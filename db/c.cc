@@ -4170,7 +4170,7 @@ void rocksdb_options_set_terark_zip_table_factory(
     rocksdb_block_based_table_options_t* bbto) {
   if (tzto && bbto) {
     opt->rep.table_factory.reset(
-        TERARKDB_NAMESPACE::NewTerarkZipTableFactory(tzto->rep, TERARKDB_NAMESPACE::NewBlockBasedTableFactory(bbto->rep)));
+        TERARKDB_NAMESPACE::NewTerarkZipTableFactory(tzto->rep, std::shared_ptr<TERARKDB_NAMESPACE::TableFactory>(TERARKDB_NAMESPACE::NewBlockBasedTableFactory(bbto->rep))));
   }
 }
 
