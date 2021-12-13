@@ -173,6 +173,9 @@ struct rocksdb_compactoptions_t {
 struct rocksdb_block_based_table_options_t {
   BlockBasedTableOptions rep;
 };
+struct rocksdb_terark_zip_table_options_t {
+  TerarkZipTableOptions rep;
+};
 struct rocksdb_cuckoo_table_options_t {
   CuckooTableOptions rep;
 };
@@ -4130,10 +4133,6 @@ uint64_t rocksdb_approximate_memory_usage_get_cache_total(
 void rocksdb_approximate_memory_usage_destroy(rocksdb_memory_usage_t* usage) {
   delete usage;
 }
-
-struct rocksdb_terark_zip_table_options_t {
-  TerarkZipTableOptions rep;
-};
 
 rocksdb_terark_zip_table_options_t* rocksdb_terark_zip_options_create() {
   return new rocksdb_terark_zip_table_options_t;

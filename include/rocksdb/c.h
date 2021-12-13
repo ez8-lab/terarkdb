@@ -94,6 +94,8 @@ typedef struct rocksdb_options_t rocksdb_options_t;
 typedef struct rocksdb_compactoptions_t rocksdb_compactoptions_t;
 typedef struct rocksdb_block_based_table_options_t
     rocksdb_block_based_table_options_t;
+typedef struct rocksdb_terark_zip_table_options_t
+    rocksdb_terark_zip_table_options_t;
 typedef struct rocksdb_cuckoo_table_options_t rocksdb_cuckoo_table_options_t;
 typedef struct rocksdb_randomfile_t rocksdb_randomfile_t;
 typedef struct rocksdb_readoptions_t rocksdb_readoptions_t;
@@ -128,9 +130,6 @@ typedef struct rocksdb_wal_iterator_t rocksdb_wal_iterator_t;
 typedef struct rocksdb_wal_readoptions_t rocksdb_wal_readoptions_t;
 typedef struct rocksdb_memory_consumers_t rocksdb_memory_consumers_t;
 typedef struct rocksdb_memory_usage_t rocksdb_memory_usage_t;
-
-typedef struct rocksdb_block_based_table_options_t
-    rocksdb_terark_zip_table_options_t;
 
 /* DB operations */
 
